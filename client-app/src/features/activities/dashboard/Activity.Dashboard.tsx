@@ -3,6 +3,7 @@ import React, { useEffect } from "react";
 import { Grid } from "semantic-ui-react";
 import LoadingComponent from "../../../app/layout/LoadingComponnet";
 import { useStore } from "../../../app/Store/store";
+import ActivityFilters from "./ActivityFilters";
 import ActivityList from "./ActivityList";
 
 
@@ -27,7 +28,7 @@ if(activityStore.loadingInitial) return<LoadingComponent content='Loading App'/>
       </Grid.Column>
 
       <Grid.Column width="6">
-        <h2>Activity filters</h2>
+      <ActivityFilters/>
       </Grid.Column>
 
     </Grid>

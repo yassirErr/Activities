@@ -1,4 +1,6 @@
-﻿using Domain;
+﻿using Application.Core;
+using Domain;
+using FluentValidation;
 using MediatR;
 using Persistence;
 using System;
@@ -10,13 +12,22 @@ using System.Threading.Tasks;
 
 namespace Application.Activities
 {
-    public class create
+    public class Create
+
     {
-        public class Command : IRequest
+        public class Command : IRequest<Result<Unit>>
         {
             public Activity Activity { get; set; }
         }
-        public class Handler : IRequestHandler<Command>
+
+        public class CommandValidator : AbstractValidator<Command> //validation errors
+        {
+            public CommandValidator()
+            {
+                RuleFor(x=>x.Activity).SetValidator(new ActivityValidator());
+            }
+        }
+        public class Handler : IRequestHandler<Command, Result<Unit>> 
         {
             private readonly DataContext _context;
 
@@ -25,13 +36,15 @@ namespace Application.Activities
                 _context = context;
             }
 
-            public async Task<Unit> Handle(Command request, CancellationToken cancellationToken)
+            public async Task<Result<Unit>> Handle(Command request, CancellationToken cancellationToken )
             {
                 _context.Activities.Add(request.Activity);
 
-                await _context.SaveChangesAsync();
+              var result = await _context.SaveChangesAsync() > 0;
 
-                return Unit.Value;
+
+
+                return Result<Unit>.Success(Unit.Value);
 
 
             }

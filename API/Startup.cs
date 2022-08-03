@@ -19,6 +19,8 @@ using Microsoft.OpenApi.Models;
 using Persistence;
 using FluentValidation.AspNetCore;
 using API.Middleware;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc.Authorization;
 
 namespace API
 {
@@ -38,12 +40,22 @@ namespace API
 
             {
 
-                    services.AddControllers().AddFluentValidation(config => {  //validation errors 
+            //every single endpoint in controller api , required to be authenticated
+                    services.AddControllers(opt =>
+                    {
+                        var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+                        opt.Filters.Add(new AuthorizeFilter(policy));
+                    })
+
+         .AddFluentValidation(config => 
+
+                    {  //validation errors 
                     config.RegisterValidatorsFromAssemblyContaining<Create>();
 
                     });
 
                     services.AddApplicationServices(_config);
+                    services.AddIdentityServices(_config);
 
 
             }
@@ -65,6 +77,8 @@ namespace API
 
             app.UseRouting();
             app.UseCors("CorsPolicy");
+
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
